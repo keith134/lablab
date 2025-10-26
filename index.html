@@ -1,0 +1,454 @@
+<!doctype html>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    // allow vertical scrolling (override styles set later)
+    document.documentElement.style.height = 'auto';
+    document.body.style.height = 'auto';
+    document.body.style.overflow = 'auto';
+
+    // add background audio element (place the MP3 file next to this HTML file)
+    if (!document.getElementById('bgAudio')) {
+        const a = document.createElement('audio');
+        a.id = 'bgAudio';
+        a.src = 'Gimingaw Na Kayko Nimo (2).mp3';
+        a.loop = true;
+        a.preload = 'auto';
+        document.body.appendChild(a);
+
+        // toggle the audio when the existing Play button is clicked (delegated)
+        document.addEventListener('click', (ev) => {
+            const btn = ev.target.closest && ev.target.closest('#playBtn');
+            if (!btn) return;
+            // user gesture: play/pause the audio
+            if (a.paused) {
+                a.play().catch(()=>{/* ignore play errors */});
+            } else {
+                a.pause();
+                a.currentTime = 0;
+            }
+        });
+    }
+});
+</script>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>For FARAH MAE AMPER — A Love Letter</title>
+<style>
+    :root{
+        --bg1: #0f172a;
+        --bg2: #2b1a3b;
+        --glass: rgba(255,255,255,0.06);
+        --accent: #ff6b9a;
+        --accent2: #ffd1e0;
+        --muted: rgba(255,255,255,0.65);
+        --card-w: min(900px, 92vw);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+        margin:0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        background: radial-gradient(800px 800px at 10% 10%, rgba(255,140,180,0.08), transparent 10%),
+                                linear-gradient(160deg, var(--bg1), var(--bg2) 60%);
+        color: #fff;
+        overflow:hidden;
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* floating stars/particles */
+    .sky {
+        position:fixed;
+        inset:0;
+        pointer-events:none;
+        overflow:hidden;
+    }
+    .star{
+        position:absolute;
+        width:4px;height:4px;
+        background:linear-gradient(45deg,#fff8,#fff2);
+        border-radius:50%;
+        opacity:0.6;
+        filter:blur(0.7px);
+        animation: drift 10s linear infinite;
+    }
+    @keyframes drift{
+        from { transform: translateY(0) translateX(0) }
+        to   { transform: translateY(-120vh) translateX(40vw) }
+    }
+
+    /* Main card */
+    .card{
+        width:var(--card-w);
+        margin:6vh auto;
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        border-radius:18px;
+        padding: clamp(18px, 4vw, 42px);
+        box-shadow: 0 10px 40px rgba(2,6,23,0.6);
+        backdrop-filter: blur(8px) saturate(120%);
+        border: 1px solid rgba(255,255,255,0.03);
+        position:relative;
+        overflow:hidden;
+    }
+
+    header{
+        display:flex;
+        align-items:center;
+        gap:16px;
+        margin-bottom:12px;
+    }
+    .badge{
+        width:64px;height:64px;border-radius:14px;
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        display:grid;place-items:center;
+        font-weight:700;color:#1b0226;font-size:28px;
+        box-shadow: 0 8px 30px rgba(255,107,154,0.15), inset 0 -6px 18px rgba(255,255,255,0.06);
+    }
+    h1{
+        margin:0;
+        font-size: clamp(18px, 3.2vw, 36px);
+        letter-spacing:0.6px;
+    }
+    p.lead{color:var(--muted); margin:6px 0 20px 0; font-size:14px}
+
+    /* Letter area */
+    .letter{
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        border-radius:12px;
+        padding:28px;
+        min-height:260px;
+        line-height:1.6;
+        position:relative;
+        font-size:16px;
+        color: #ffdfe9;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+    }
+
+    .typed{
+        white-space:pre-wrap;
+        font-family: "Times New Roman", Georgia, serif;
+        font-style:italic;
+        font-size:clamp(16px,2.4vw,20px);
+    }
+    .cursor{
+        display:inline-block;
+        width:10px;
+        height:22px;
+        background:linear-gradient(90deg,#fff6,#fff2);
+        margin-left:4px;
+        vertical-align:bottom;
+        animation: blink 1s steps(2) infinite;
+    }
+    @keyframes blink { 50%{opacity:0} }
+
+    /* hearts that follow cursor */
+    .heart{
+        position:fixed;
+        pointer-events:none;
+        transform-origin:center;
+        font-size:20px;
+        will-change:transform,opacity;
+        mix-blend-mode:screen;
+        text-shadow: 0 6px 20px rgba(0,0,0,0.35);
+        animation: floatUp 1200ms cubic-bezier(.2,.9,.3,1) forwards;
+    }
+    @keyframes floatUp{
+        0% { transform: translate(-50%,-50%) scale(0.7) rotate(0deg); opacity:1 }
+        100% { transform: translate(-50%,-220%) scale(1.6) rotate(18deg); opacity:0 }
+    }
+
+    /* controls */
+    .controls{
+        position:absolute;
+        right:18px;top:18px;
+        display:flex;gap:10px;align-items:center;
+    }
+    .btn{
+        background:transparent;border:none;color:var(--accent2);
+        padding:8px;border-radius:10px;cursor:pointer;font-weight:600;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+    }
+    .play{
+        width:44px;height:44px;display:grid;place-items:center;
+        background:linear-gradient(135deg,#ff8ab3,#ffdfeb);
+        color:#2b0720;font-weight:700;border-radius:12px;
+    }
+    .hint{font-size:12px;color:var(--muted); margin-top:12px}
+
+    footer{margin-top:18px;text-align:right;color:var(--muted);font-size:13px}
+
+    /* small screen adjustments */
+    @media (max-width:520px){
+        .card{margin:4vh 12px;padding:18px}
+        .badge{width:48px;height:48px;font-size:20px}
+        .controls{right:12px;top:12px}
+    }
+</style>
+</head>
+<body>
+    <div class="sky" aria-hidden="true"></div>
+
+    <!-- Background audio file -->
+    <audio id="bgAudio" src="Gimingaw Na Kayko Nimo (2).mp3" loop preload="auto" aria-hidden="true"></audio>
+
+    <div class="card" role="main" aria-labelledby="title"></div>
+        <header>
+            <div class="badge">F M</div>
+            <div>
+                <h1 id="title">For FARAH MAE AMPER</h1>
+                <p class="lead">my lablab, part, bb — a little animated love letter</p>
+            </div>
+
+            <div class="controls" aria-hidden="false">
+                <button id="playBtn" class="btn play" title="Play / Pause melody" aria-pressed="false">♪</button>
+                <button id="kissBtn" class="btn" title="Send a heart">💌</button>
+            </div>
+        </header>
+
+        <article class="letter" aria-label="Love letter">
+            <div id="typed" class="typed" aria-live="polite"></div>
+            <div class="hint">Move the cursor to leave hearts. Click anywhere to send a shower. Tap the music button to play a soft melody.</div>
+            <footer>— Always, <strong>your lablab</strong></footer>
+        </article>
+    </div>
+
+    <script>
+    // Ensure the play button also toggles the background MP3 if present.
+    document.addEventListener('DOMContentLoaded', function(){
+        const bg = document.getElementById('bgAudio');
+        const btn = document.getElementById('playBtn');
+        if (bg && btn) {
+            btn.addEventListener('click', (e) => {
+                // keep other handlers (melody) working; just toggle the MP3
+                if (bg.paused) {
+                    bg.play().catch(()=>{/* ignore play errors */});
+                } else {
+                    bg.pause();
+                    bg.currentTime = 0;
+                }
+            });
+        }
+    });
+    </script>
+</body>
+
+<script>
+/* -------------------------
+     STARS background
+     ------------------------- */
+(function makeStars(){
+    const sky = document.querySelector('.sky');
+    const count = 28;
+    for(let i=0;i<count;i++){
+        const s = document.createElement('div');
+        s.className = 'star';
+        const left = Math.random()*100;
+        const top = Math.random()*120;
+        const size = 1 + Math.random()*5;
+        s.style.left = left + 'vw';
+        s.style.top = top + 'vh';
+        s.style.width = s.style.height = size + 'px';
+        s.style.opacity = 0.1 + Math.random()*0.9;
+        s.style.animationDuration = (8 + Math.random()*18) + 's';
+        s.style.animationDelay = (-Math.random()*18) + 's';
+        sky.appendChild(s);
+    }
+})();
+
+/* -------------------------
+     Typed love letter
+     ------------------------- */
+const typedEl = document.getElementById('typed');
+const lines = [
+    "My dearest FARAH MAE AMPER,",
+    "",
+    "Every time I think of you, my heart does tiny fireworks. You are my lablab, my part, my bb —",
+    "the softest whisper in a loud world, the warm hand at the end of a long day.",
+    "",
+    "I made this little page so every time you move your mouse, a tiny heart follows —",
+    "like the way my thoughts follow you, always.",
+    "",
+    "If you listen, there is a gentle melody waiting —",
+    "a small loop of notes that think of your laughter.",
+    "",
+    "Forever and always,",
+    "— your lablab"
+];
+
+let lineIndex = 0, charIndex = 0;
+function typeNext(){
+    if(lineIndex >= lines.length) return;
+    const current = lines[lineIndex];
+    if(charIndex <= current.length){
+        typedEl.innerText = lines.slice(0,lineIndex).join('\n') + (lineIndex ? '\n' : '') + current.slice(0,charIndex) + (charIndex % 2 ? '|' : '');
+        charIndex++;
+        setTimeout(typeNext, 35 + Math.random()*30);
+    } else {
+        charIndex = 0;
+        lineIndex++;
+        setTimeout(typeNext, 300);
+    }
+}
+typeNext();
+
+/* -------------------------
+     Heart particles that follow cursor
+     ------------------------- */
+function createHeart(x,y,opts={}){
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.textContent = opts.char || '❤';
+    const size = opts.size || (12 + Math.random()*28);
+    h.style.left = x + 'px';
+    h.style.top = y + 'px';
+    h.style.fontSize = size + 'px';
+    h.style.color = opts.color || (Math.random() > 0.5 ? '#ff9bb8' : '#ffd2e6');
+    h.style.opacity = 1;
+    if (opts.rotate) h.style.transform = `translate(-50%,-50%) rotate(${opts.rotate}deg)`;
+    document.body.appendChild(h);
+    h.addEventListener('animationend', ()=> h.remove());
+    // tiny random drift using CSS variable tweak
+    return h;
+}
+
+let lastMove = 0;
+function onMove(e){
+    const now = Date.now();
+    // throttle slightly
+    if (now - lastMove < 20) return;
+    lastMove = now;
+    const x = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX) || window.innerWidth/2;
+    const y = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY) || window.innerHeight/2;
+    createHeart(x,y,{size: 14 + Math.random()*18, rotate: (Math.random()*40)-20});
+}
+window.addEventListener('mousemove', onMove);
+window.addEventListener('touchmove', onMove, {passive:true});
+
+/* Click to shower hearts */
+function shower(e){
+    const rect = {left:0,top:0};
+    const cx = (e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX) || window.innerWidth/2) - rect.left;
+    const cy = (e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY) || window.innerHeight/2) - rect.top;
+    for(let i=0;i<20;i++){
+        setTimeout(()=> createHeart(
+            cx + (Math.random()*140-70),
+            cy + (Math.random()*120-60),
+            {size: 10 + Math.random()*30, char: (Math.random()>0.15?'❤':'💖')}
+        ), i*20);
+    }
+}
+window.addEventListener('click', shower);
+window.addEventListener('touchstart', shower);
+
+/* Kiss button */
+document.getElementById('kissBtn').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    // center shower
+    const cx = window.innerWidth/2;
+    const cy = window.innerHeight/2;
+    for(let i=0;i<50;i++){
+        setTimeout(()=> createHeart(
+            cx + (Math.random()*420-210),
+            cy + (Math.random()*300-140),
+            {size: 12 + Math.random()*34, char: '💘'}
+        ), i*18);
+    }
+});
+
+/* -------------------------
+     Simple WebAudio melody (user gesture required)
+     ------------------------- */
+let audioCtx = null;
+let playing = false;
+let schedInterval = null;
+
+function ensureAudio(){
+    if(!audioCtx){
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+const melody = [
+    {note: 440, dur:160}, // A4
+    {note: 523.25, dur:160}, // C5
+    {note: 659.25, dur:240}, // E5
+    {note: 523.25, dur:160},
+    {note: 440, dur:400},
+    {note: 0, dur:120}
+];
+
+function playNote(freq, when, duration){
+    if(!audioCtx) return;
+    if(freq <= 0) return;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    g.gain.value = 0.0001;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(when);
+    // quick fade in/out to be gentle
+    g.gain.setTargetAtTime(0.0008, when + 0.01, 0.02);
+    g.gain.setTargetAtTime(0.00001, when + duration/1000 - 0.02, 0.05);
+    o.stop(when + duration/1000 + 0.05);
+}
+
+function scheduleLoop(){
+    if(!audioCtx) return;
+    const now = audioCtx.currentTime + 0.05;
+    let t = now;
+    melody.forEach(m=>{
+        playNote(m.note, t, m.dur);
+        t += m.dur/1000;
+    });
+    // repeat
+    schedInterval = setTimeout(scheduleLoop, (t - now)*1000);
+}
+
+const playBtn = document.getElementById('playBtn');
+playBtn.addEventListener('click', async (e)=>{
+    e.stopPropagation();
+    ensureAudio();
+    if(audioCtx.state === 'suspended'){
+        try { await audioCtx.resume(); } catch(e){}
+    }
+    if(!playing){
+        scheduleLoop();
+        playing = true;
+        playBtn.setAttribute('aria-pressed','true');
+        playBtn.style.transform = 'scale(0.98)';
+    } else {
+        playing = false;
+        clearTimeout(schedInterval);
+        schedInterval = null;
+        playBtn.setAttribute('aria-pressed','false');
+        playBtn.style.transform = '';
+    }
+});
+
+/* Start audio on first interaction (if user clicked elsewhere) */
+function startOnFirstGesture(){
+    ensureAudio();
+    if(audioCtx && audioCtx.state === 'suspended'){
+        audioCtx.resume().catch(()=>{});
+    }
+    window.removeEventListener('pointerdown', startOnFirstGesture);
+}
+window.addEventListener('pointerdown', startOnFirstGesture);
+
+/* Accessibility: pause animations when reduced motion requested */
+const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+if(mq.matches){
+    document.querySelectorAll('.star').forEach(s=>s.style.animationDuration = '0s');
+    document.querySelectorAll('.heart').forEach(h=>h.style.animationDuration = '0s');
+    // stop typing quickly
+    // (no change, but user can read)
+}
+
+</script>
+</body>
+</html>
